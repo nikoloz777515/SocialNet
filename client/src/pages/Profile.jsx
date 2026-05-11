@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import React, { useState, useRef, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
 import { usePost } from "../context/PostContext";
 import { LogOut, Users, MessageSquare, UserPlus, Clock, UserMinus, Edit3, Save, X, Camera } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
