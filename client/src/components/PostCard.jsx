@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Send, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Send, Trash2 } from "lucide-react"; 
 import { usePost } from "../context/PostContext";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
@@ -8,7 +8,7 @@ import { getAvatarUrl } from "../utils/avatar";
 const PostCard = ({ post }) => {
   const { toggleLike, deletePost, addComment } = usePost();
   const { user: currentUser } = useAuth();
-  const API_URL = `${import.meta.env.VITE_API_URL}`;
+ const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
 
   const [commentText, setCommentText] = useState("");
   const [showComments, setShowComments] = useState(false);
