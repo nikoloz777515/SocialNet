@@ -26,7 +26,7 @@ const server = http.createServer(app);
 
 
 app.use(cors({ 
-    origin: true,
+  origin: 'https://social-net-silk.vercel.app', 
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

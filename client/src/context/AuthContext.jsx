@@ -10,27 +10,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
 
- const loadUser = async () => {
-    try {
-      const res = await fetch(`${API_URL}/me`, { credentials: "include" });
-      const data = await res.json();
+const loadUser = async () => {
+  try {
+    const res = await fetch(`${API_URL}/me`, { credentials: "include" });
+    const data = await res.json();
 
-      const userData = data?.data?.user || data?.user;
-
-      if (res.ok && userData) {
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
-      } else {
-        setUser(null);
-        localStorage.removeItem("user");
-      }
-    } catch (err) {
-      console.error("Load user error:", err);
-  
-    } finally {
-      setLoading(false);
+    // შეცვლილი ლოგიკა პასუხის სტრუქტურის მიხედვით
+    if (res.ok && data.user) {
+      setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
+    } else {
+      setUser(null);
+      localStorage.removeItem("user");
     }
-  };
+  } catch (err) {
+    console.error("Load user error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
 const signup = async (formData) => {
     const res = await fetch(`${API_URL}/signup`, {
@@ -53,29 +51,24 @@ const signup = async (formData) => {
   };
 
 const login = async (formData) => {
-    const res = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(formData),
-    });
+  const res = await fetch(`${API_URL}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }, 
+    credentials: "include",
+    body: JSON.stringify(formData),
+  });
 
-    const data = await res.json();
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Login failed");
 
-    if (!res.ok) {
-      throw new Error(data.message || "Login failed");
-    }
-
-    const userData = data?.data?.user || data?.user;
-
-    if (userData) {
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-      return userData;
-    }
-
-    throw new Error("Server doesn't respond correctly");
-  };
+  const userData = data?.data?.user || data?.user;
+  if (userData) {
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    return userData;
+  }
+  throw new Error("Server error");
+};
 
 const logout = async () => {
     try {

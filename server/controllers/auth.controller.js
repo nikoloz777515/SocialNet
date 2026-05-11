@@ -67,7 +67,12 @@ const logIn = catchAsync(async(req, res, next) => {
     expiresIn: process.env.JWT_EXPIRES 
   });
 
-  res.cookie("jwt", token, { httpOnly: true });
+  res.cookie("jwt", token, { 
+  httpOnly: true,
+  secure: true,     
+  sameSite: 'none',  
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 დღე
+});
 
   user.password = undefined;
 

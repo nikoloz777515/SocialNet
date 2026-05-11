@@ -103,7 +103,7 @@ const Login = () => {
               className="bg-white/10 hover:bg-white/20 border border-white/20 text-white py-3 rounded-2xl transition-all"
             >
               <a
-                href="${import.meta.env.VITE_API_URL}/api/auth/google"
+                href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
               >
                 Google
               </a>

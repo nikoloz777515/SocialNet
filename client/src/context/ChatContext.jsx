@@ -29,10 +29,9 @@ export const ChatProvider = ({ children }) => {
         const token = getCookie('jwt');
         try {
 
-            const res = await fetch(`${API_URL}/friend/friends`, {
-                headers: { 'Authorization': `Bearer ${token}` },
-                credentials: 'include'
-            });
+          const res = await fetch(`${API_URL}/friend/friends`, {
+    credentials: 'include' 
+});
             const data = await res.json();
             if (res.ok) {
 
