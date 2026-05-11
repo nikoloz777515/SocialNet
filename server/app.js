@@ -26,7 +26,7 @@ const server = http.createServer(app);
 
 
 app.use(cors({ 
-  origin: process.env.CLIENT_URL,
+    origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -37,7 +37,7 @@ app.use(morgan('dev'));
 
 const io = new Server(server, {
   cors: { 
-    origin: process.env.CLIENT_URL, 
+     origin: true,
     credentials: true 
   }
 });

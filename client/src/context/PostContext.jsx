@@ -11,7 +11,6 @@ export const PostProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await fetch(API_BASE_URL, { credentials: "include" });
-      const data = await res.json();
       if (res.ok) setPosts(data.data || []);
     } catch (err) {
       console.error("Fetch error:", err);
