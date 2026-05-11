@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import React, { useState, useRef, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import { usePost } from "../context/PostContext";
 import { LogOut, Users, MessageSquare, UserPlus, Clock, UserMinus, Edit3, Save, X, Camera } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -25,9 +27,9 @@ const Profile = () => {
   const [newName, setNewName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [coverUploading, setCoverUploading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false); // მეგობრობის მოქმედებებისთვის
 
   const isMyProfile = !userId || userId === currentUser?._id;
-
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -42,16 +44,15 @@ const Profile = () => {
         if (userRes.ok) {
           const userObj = userData.user || userData;
           setProfileUser(userObj);
+          // ბექენდიდან მოდის friendshipStatus (friends, pending, requested, none)
           setFriendStatus(userData.friendshipStatus || 'none');
           setNewName(userObj.fullname || "");
         }
-
 
         const friendsRes = await fetch(`http://localhost:3000/api/friend/friends/${targetId}`, { credentials: 'include' });
         const friendsData = await friendsRes.json();
 
         if (friendsRes.ok) {
-     
           setFriendships(friendsData.friends || []);
         }
 
@@ -64,7 +65,6 @@ const Profile = () => {
 
     fetchProfileData();
   }, [userId, currentUser]);
-
 
   const handleUpdateProfile = async () => {
     if (!newName.trim()) return;
@@ -106,6 +106,33 @@ const Profile = () => {
     finally { type === 'profile' ? setUploading(false) : setCoverUploading(false); }
   };
 
+  // მეგობრობის მოთხოვნა / წაშლა
+  const handleFriendAction = async () => {
+    if (!profileUser?._id || actionLoading) return;
+    
+    // ლოგიკა: თუ უკვე მეგობარია ან მოთხოვნა გაგზავნილია - წაშლა, თუ არადა - დამატება
+    const isActionRemove = friendStatus === 'friends' || friendStatus === 'pending' || friendStatus === 'requested';
+    const endpoint = isActionRemove ? 'remove-friend' : 'send-request';
+    
+    if (friendStatus === 'friends' && !window.confirm("ნამდვილად გსურთ მეგობრობის გაუქმება?")) return;
+
+    setActionLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3000/api/friend/${endpoint}/${profileUser._id}`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        // გვერდის განახლება სტატუსის შესაცვლელად
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const getCoverUrl = (path) => path ? `http://localhost:3000/uploads/covers/${path}` : null;
 
   if (loading) return <div className="min-h-screen bg-[#0f172a] flex items-center justify-center text-white italic">Loading Profile...</div>;
@@ -114,10 +141,8 @@ const Profile = () => {
     <div className="min-h-screen bg-[#0f172a] text-white pb-20 font-sans">
       <div className="max-w-7xl mx-auto px-4 py-10">
 
-    
         <div className="backdrop-blur-2xl bg-white/5 border border-white/10 rounded-[45px] overflow-hidden mb-10 shadow-2xl">
 
-       
           <div className="relative h-64 group">
             {profileUser?.coverPhoto ? (
               <img src={getCoverUrl(profileUser.coverPhoto)} className="w-full h-full object-cover" alt="cover" />
@@ -135,7 +160,7 @@ const Profile = () => {
           </div>
 
           <div className="px-8 pb-8 flex flex-col lg:flex-row items-center lg:items-end gap-8 -mt-20">
-     
+
             <div className="relative group z-20">
               <img
                 src={getAvatarUrl(profileUser?.avatar)}
@@ -179,22 +204,44 @@ const Profile = () => {
                     <LogOut size={18} /> გასვლა
                   </button>
                 ) : (
-                  <button
-                    onClick={() => { setActiveChat(profileUser); navigate('/messages'); }}
-                    className="px-8 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 font-black uppercase flex items-center gap-3 transition-all cursor-pointer shadow-lg shadow-indigo-500/20"
-                  >
-                    <MessageSquare size={22} /> Message
-                  </button>
+                  <div className="flex gap-3">
+                    {/* მეგობრობის ღილაკი */}
+                    <button
+                      disabled={actionLoading}
+                      onClick={handleFriendAction}
+                      className={`px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg cursor-pointer ${
+                        friendStatus === 'pending' || friendStatus === 'requested' ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/20' : 
+                        friendStatus === 'friends' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 
+                        'bg-indigo-600 text-white hover:bg-indigo-700'
+                      }`}
+                    >
+                      {friendStatus === 'pending' || friendStatus === 'requested' ? <Clock size={18}/> : 
+                       friendStatus === 'friends' ? <UserMinus size={18}/> : <UserPlus size={18}/>}
+                      {friendStatus === 'pending' || friendStatus === 'requested' ? 'მოლოდინი' : 
+                       friendStatus === 'friends' ? 'წაშლა' : 'დამატება'}
+                    </button>
+
+                    {/* Message ღილაკი - გააქტიურდება მხოლოდ თუ მეგობრები არიან */}
+                    <button
+                      disabled={friendStatus !== 'friends'}
+                      onClick={() => { setActiveChat(profileUser); navigate('/messages'); }}
+                      className={`px-8 py-3 rounded-2xl font-black uppercase flex items-center gap-3 transition-all cursor-pointer shadow-lg ${
+                        friendStatus === 'friends' 
+                        ? "bg-white/10 hover:bg-white/20 border border-white/10" 
+                        : "bg-white/5 text-gray-600 cursor-not-allowed border border-white/5"
+                      }`}
+                    >
+                      <MessageSquare size={22} /> Message
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="flex flex-col lg:flex-row gap-10">
 
-          {/* Posts Timeline */}
           <div className="flex-1 space-y-6">
             <h2 className="text-2xl font-black italic uppercase text-indigo-400 tracking-widest">Timeline</h2>
             {posts.filter(p => (p.userId?._id || p.userId) === profileUser?._id).length > 0 ? (
@@ -208,7 +255,6 @@ const Profile = () => {
             )}
           </div>
 
-          {/* Sidebar - Connections */}
           <div className="w-full lg:w-[380px]">
             <div className="bg-white/5 border border-white/10 rounded-[40px] p-8 sticky top-5 shadow-xl">
               <div className="flex items-center justify-between mb-8">

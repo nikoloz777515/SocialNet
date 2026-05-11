@@ -21,6 +21,7 @@ const postRouter = require('./routers/post.router');
 const globalErrorHandler = require('./controllers/error.controller');
 
 const app = express();
+app.enable('trust proxy')
 const server = http.createServer(app);
 
 
@@ -47,7 +48,10 @@ connectDB();
 app.use(session({
   name: 'session',
   keys: ['cyber-key'], 
-  maxAge: 24 * 60 * 60 * 1000
+  maxAge: 24 * 60 * 60 * 1000,
+  secure: true,      
+  sameSite: 'none',  
+  httpOnly: true
 }));
 
 
@@ -103,7 +107,7 @@ app.set('socketio', io);
 app.set('onlineUsers', onlineUsers);
 
 
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 //  API როუტები
 app.use('/api/auth', authRouter);

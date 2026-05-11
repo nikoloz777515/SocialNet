@@ -11,14 +11,13 @@ const sendMessage = catchAsync(async (req, res, next) => {
     const receiver = (receiverId && receiverId !== "undefined" && receiverId !== "null") ? receiverId : null;
     const group = (groupId && groupId !== "undefined" && groupId !== "null") ? groupId : null;
 
-    const newMessage = await Message.create({
-        sender: senderId,
-        receiver,
-        group,
-        content: content || "",
-        messageImage: req.file ? req.file.filename : null
-    });
-
+   const newMessage = await Message.create({
+    sender: senderId,
+    receiver,
+    group,
+    content: content || "",
+    messageImage: req.file ? req.file.path : null 
+});
     const populatedMessage = await Message.findById(newMessage._id)
         .populate('sender', 'fullname username profilePicture avatar');
 

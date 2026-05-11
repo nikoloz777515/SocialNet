@@ -102,16 +102,15 @@ const updateMe = catchAsync(async (req, res, next) => {
     const filteredBody = {};
     if (req.body.fullname) filteredBody.fullname = req.body.fullname;
     
-    
+   
     if (req.files && req.files.profile) {
-        filteredBody.avatar = req.files.profile[0].filename;
+        filteredBody.avatar = req.files.profile[0].path; 
     }
 
     
     if (req.files && req.files.cover) {
-        filteredBody.coverPhoto = req.files.cover[0].filename;
+        filteredBody.coverPhoto = req.files.cover[0].path;
     }
-
 
     const updatedUser = await User.findByIdAndUpdate(
         req.user._id || req.user.id, 

@@ -16,15 +16,14 @@ const getAllPosts = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', results: posts.length, data: posts });
 });
 
-//  პოსტის შექმნა
+//პოსტის შექმნა
 const createPost = catchAsync(async (req, res, next) => {
   const { title, content } = req.body;
 
   const newPost = await Post.create({
     title,
     content,
-    // აი აქ დაამატე ფაილის სახელი:
-    postImage: req.file ? req.file.filename : null, 
+    postImage: req.file ? req.file.path : null, 
     userId: req.user._id
   });
 
@@ -46,12 +45,16 @@ const editPost = catchAsync(async (req, res, next) => {
   post.title = title || post.title;
   post.content = content || post.content;
   
+ 
+  if (req.file) {
+    post.postImage = req.file.path;
+  }
+  
   await post.save();
 
   const updatedPost = await post.populate('userId', 'fullname profilePicture');
-
   res.status(200).json({ status: 'success', data: updatedPost });
-});
+});;
 
 
 const postLike = catchAsync(async (req, res, next) => {
