@@ -1,9 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import React, { useState, useEffect, useRef } from "react"; // დაემატა useRef
-import { useAuth } from "../context/AuthContext"; // დაემატა useAuth
+import React, { useState, useEffect, useRef } from "react"; 
+import { useAuth } from "../context/AuthContext"; 
 import { usePost } from "../context/PostContext";
-import { LogOut, Users, MessageSquare, UserPlus, Clock, UserMinus, Edit3, Save, X, Camera } from "lucide-react";
+import { 
+  LogOut, 
+  Users, 
+  MessageSquare, 
+  UserPlus, 
+  Clock, 
+  UserMinus, 
+  Edit3, 
+  Save, 
+  X, 
+  Camera 
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useChat } from "../context/ChatContext";
 import PostCard from "../components/PostCard";

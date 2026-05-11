@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { getAvatarUrl } from "../utils/avatar";
 
+
+
 const PostCard = ({ post }) => {
   const { toggleLike, deletePost, addComment } = usePost();
   const { user: currentUser } = useAuth();
