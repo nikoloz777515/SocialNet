@@ -110,7 +110,7 @@ const GroupChat = () => {
                                         {msg.content && <p className="text-sm break-words">{msg.content}</p>}
                                         {msg.messageImage && (
                                             <img
-                                                src={`${import.meta.env.VITE_API_URL}/uploads/messages/${msg.messageImage}`}
+                                                 src={`${import.meta.env.VITE_API_URL}/uploads/messages/${msg.messageImage}`}
                                                 className="rounded-lg mt-2 max-w-full border border-white/5 shadow-md"
                                                 alt="attached"
                                             />

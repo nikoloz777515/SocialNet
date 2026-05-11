@@ -52,7 +52,7 @@ export const ChatProvider = ({ children }) => {
 
     useEffect(() => {
         if (user?._id) {
-            const newSocket = io("${import.meta.env.VITE_API_URL}", { withCredentials: true });
+            const newSocket = io(import.meta.env.VITE_API_URL, { withCredentials: true });
             setSocket(newSocket);
             newSocket.emit('setup', user._id);
             newSocket.on('userStatusUpdate', (users) => setOnlineUsers(users));

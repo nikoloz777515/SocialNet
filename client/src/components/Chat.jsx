@@ -127,7 +127,7 @@ const Chat = () => {
                   {msg.messageImage && (
                     <div className="my-1 overflow-hidden rounded-xl border border-white/10">
                       <img
-                        src={`${import.meta.env.VITE_API_URL}/uploads/messages/${msg.messageImage}`}
+                       src={`${import.meta.env.VITE_API_URL}/uploads/messages/${msg.messageImage}`}
                         className="max-w-full h-auto max-h-[350px] object-contain block"
                         alt="attachment"
                       />

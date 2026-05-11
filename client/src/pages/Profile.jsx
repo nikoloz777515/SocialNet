@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import React, { useState, useEffect, useRef } from "react"; // დაემატა useRef
+import { useAuth } from "../context/AuthContext"; // დაემატა useAuth
 import { usePost } from "../context/PostContext";
 import { LogOut, Users, MessageSquare, UserPlus, Clock, UserMinus, Edit3, Save, X, Camera } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -29,45 +31,46 @@ const Profile = () => {
 
   const isMyProfile = !userId || userId === currentUser?._id;
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      setLoading(true);
-      try {
-        const targetId = userId || currentUser?._id;
-        if (!targetId) return;
+  // ფუნქცია მონაცემების წამოსაღებად (გამოტანილია გარეთ, რომ მეგობრობისას გამოვიყენოთ)
+  const fetchProfileData = async () => {
+    try {
+      const targetId = userId || currentUser?._id;
+      if (!targetId) return;
 
-        const userRes = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/user/${targetId}`, { credentials: 'include' });
-        const userData = await userRes.json();
+      const userRes = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/user/${targetId}`, { credentials: 'include' });
+      const userData = await userRes.json();
 
-        if (userRes.ok) {
-          const userObj = userData.user || userData;
-          setProfileUser(userObj);
-          // ბექენდიდან მოდის friendshipStatus (friends, pending, requested, none)
-          setFriendStatus(userData.friendshipStatus || 'none');
-          setNewName(userObj.fullname || "");
-        }
-
-        const friendsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/friends/${targetId}`, { credentials: 'include' });
-        const friendsData = await friendsRes.json();
-
-        if (friendsRes.ok) {
-          setFriendships(friendsData.friends || []);
-        }
-
-      } catch (err) {
-        console.error("Fetch error:", err);
-      } finally {
-        setLoading(false);
+      if (userRes.ok) {
+        const userObj = userData.user || userData;
+        setProfileUser(userObj);
+        setFriendStatus(userData.friendshipStatus || 'none');
+        setNewName(userObj.fullname || "");
       }
-    };
 
+      const friendsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/friends/${targetId}`, { credentials: 'include' });
+      const friendsData = await friendsRes.json();
+
+      if (friendsRes.ok) {
+        setFriendships(friendsData.friends || []);
+      }
+
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
     fetchProfileData();
   }, [userId, currentUser]);
 
   const handleUpdateProfile = async () => {
     if (!newName.trim()) return;
     try {
-      const res = await fetch("${import.meta.env.VITE_API_URL}/api/auth/updateMe", {
+      // გასწორდა: ბრჭყალები შეიცვალა Backticks-ით
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/updateMe`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullname: newName }),
@@ -90,7 +93,8 @@ const Profile = () => {
 
     type === 'profile' ? setUploading(true) : setCoverUploading(true);
     try {
-      const res = await fetch("${import.meta.env.VITE_API_URL}/api/auth/updateMe", {
+  
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/updateMe`, {
         method: "PATCH",
         body: formData,
         credentials: "include",
@@ -104,11 +108,9 @@ const Profile = () => {
     finally { type === 'profile' ? setUploading(false) : setCoverUploading(false); }
   };
 
-  // მეგობრობის მოთხოვნა / წაშლა
   const handleFriendAction = async () => {
     if (!profileUser?._id || actionLoading) return;
 
-    // ლოგიკა: თუ უკვე მეგობარია ან მოთხოვნა გაგზავნილია - წაშლა, თუ არადა - დამატება
     const isActionRemove = friendStatus === 'friends' || friendStatus === 'pending' || friendStatus === 'requested';
     const endpoint = isActionRemove ? 'remove-friend' : 'send-request';
 
@@ -121,8 +123,8 @@ const Profile = () => {
         credentials: 'include'
       });
       if (res.ok) {
-        // გვერდის განახლება სტატუსის შესაცვლელად
-        window.location.reload();
+  
+        fetchProfileData();
       }
     } catch (err) {
       console.error(err);
@@ -203,7 +205,6 @@ const Profile = () => {
                   </button>
                 ) : (
                   <div className="flex gap-3">
-                    {/* მეგობრობის ღილაკი */}
                     <button
                       disabled={actionLoading}
                       onClick={handleFriendAction}
@@ -218,7 +219,6 @@ const Profile = () => {
                         friendStatus === 'friends' ? 'წაშლა' : 'დამატება'}
                     </button>
 
-                    {/* Message ღილაკი - გააქტიურდება მხოლოდ თუ მეგობრები არიან */}
                     <button
                       disabled={friendStatus !== 'friends'}
                       onClick={() => { setActiveChat(profileUser); navigate('/messages'); }}

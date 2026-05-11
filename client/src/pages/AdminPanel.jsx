@@ -9,9 +9,9 @@ const AdminPanel = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('${import.meta.env.VITE_API_URL}/api/admin/all-users', {
-        credentials: 'include',
-      });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/all-users`, {
+    credentials: 'include',
+});
       const data = await res.json();
       if (data.status === 'success') {
         setUsers(data.data);
