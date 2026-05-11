@@ -5,9 +5,11 @@ const AppError = require('../utils/AppError');
 
 const sendFriendRequest = catchAsync(async (req, res, next) => {
     const receiverId = req.params.userId;
-    const senderId = req.user.id;
+    const senderId = req.user._id; // <--- ყოველთვის გამოიყენე _id
 
-    if (senderId === receiverId) return next(new AppError("Cannot add yourself", 400));
+    if (senderId.toString() === receiverId) {
+        return next(new AppError("საკუთარ თავს მეგობრობას ვერ გაუგზავნით", 400));
+    }
 
     const existing = await Friendship.findOne({
         $or: [
@@ -16,10 +18,21 @@ const sendFriendRequest = catchAsync(async (req, res, next) => {
         ]
     });
 
-    if (existing) return next(new AppError("Request already exists", 400));
+    if (existing) {
+        return next(new AppError("მოთხოვნა უკვე არსებობს", 400));
+    }
 
-    await Friendship.create({ sender: senderId, receiver: receiverId });
-    res.status(200).json({ status: 'success', message: 'Request sent' });
+    // სტატუსის მითითება მნიშვნელოვანია
+    await Friendship.create({ 
+        sender: senderId, 
+        receiver: receiverId, 
+        status: 'pending' 
+    });
+
+    res.status(200).json({ 
+        status: 'success', 
+        message: 'Request sent' 
+    });
 });
 
 const acceptFriendRequest = catchAsync(async (req, res, next) => {
@@ -34,15 +47,18 @@ const acceptFriendRequest = catchAsync(async (req, res, next) => {
     res.status(200).json({ status: 'success', message: 'Friendship accepted' });
 });
 
- const rejectOrCancelRequest = catchAsync(async (req, res, next) => {
+const rejectOrCancelRequest = catchAsync(async (req, res, next) => {
     const friendId = req.params.userId;
+    const userId = req.user._id; 
+
     await Friendship.findOneAndDelete({
         $or: [
-            { sender: req.user.id, receiver: friendId },
-            { sender: friendId, receiver: req.user.id }
+            { sender: userId, receiver: friendId },
+            { sender: friendId, receiver: userId }
         ],
         status: 'pending'
     });
+    
     res.status(200).json({ status: 'success', message: 'Action completed' });
 });
 

@@ -65,17 +65,19 @@ const PostCard = ({ post }) => {
       <div className="mb-6 px-1">
         {post.title && <h2 className="text-2xl font-black text-white mb-3 italic tracking-tight uppercase leading-tight">{post.title}</h2>}
 
-        {post.postImage && (
-          <div className="mb-4 rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-black/20">
-            <img
-              src={`${API_URL}/uploads/posts/${post.postImage}`}
-              alt="Post content"
-              className="w-full h-auto max-h-[550px] object-cover hover:scale-[1.01] transition-transform duration-500"
-              loading="lazy"
-              onError={(e) => { e.target.closest('.rounded-3xl').style.display = 'none'; }}
-            />
-          </div>
-        )}
+         {post.postImage && (
+  <div className="mb-4 rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-black/20">
+    <img
+      src={post.postImage.startsWith('http') 
+        ? post.postImage 
+        : `${API_URL}/uploads/posts/${post.postImage}`
+      }
+      alt="Post content"
+      className="w-full h-auto max-h-[550px] object-cover"
+      onError={(e) => { e.target.style.display = 'none'; }}
+    />
+  </div>
+)}
 
         <p className="text-gray-300 leading-relaxed text-lg font-medium whitespace-pre-wrap">{post.content}</p>
       </div>

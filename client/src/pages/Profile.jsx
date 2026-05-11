@@ -78,7 +78,7 @@ const Profile = () => {
   const handleUpdateProfile = async () => {
     if (!newName.trim()) return;
     try {
-      // გასწორდა: ბრჭყალები შეიცვალა Backticks-ით
+      
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/updateMe`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -120,27 +120,42 @@ const Profile = () => {
   const handleFriendAction = async () => {
     if (!profileUser?._id || actionLoading) return;
 
-    const isActionRemove = friendStatus === 'friends' || friendStatus === 'pending' || friendStatus === 'requested';
-    const endpoint = isActionRemove ? 'remove-friend' : 'send-request';
+    // სტატუსების მიხედვით ენდპოინტის განსაზღვრა
+    const isActionRemove = friendStatus === 'friends';
+    const isActionCancel = friendStatus === 'pending' || friendStatus === 'requested';
+    
+    let endpoint = 'send-request';
+    if (isActionRemove) endpoint = 'remove-friend';
+    if (isActionCancel) endpoint = 'reject-request'; // შენს როუტებში reject-request გამოიყენება გასაუქმებლად
 
     if (friendStatus === 'friends' && !window.confirm("ნამდვილად გსურთ მეგობრობის გაუქმება?")) return;
 
     setActionLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/${endpoint}/${profileUser._id}`, {
-        method: 'POST',
-        credentials: 'include'
-      });
-      if (res.ok) {
-  
-        fetchProfileData();
-      }
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/${endpoint}/${profileUser._id}`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        // აი აქ იყო შეცდომა - ჯერ ვიღებთ დატას
+        const responseData = await res.json();
+
+        if (res.ok) {
+            fetchProfileData();
+        } else {
+            // თუ უკვე არსებობს, მაინც განვაახლოთ ვიზუალი
+            if (responseData.message && responseData.message.includes("exists")) {
+                fetchProfileData();
+            } else {
+                console.error("Server Error:", responseData.message);
+            }
+        }
     } catch (err) {
-      console.error(err);
+        console.error("Fetch Error:", err);
     } finally {
-      setActionLoading(false);
+        setActionLoading(false);
     }
-  };
+};
 
   const getCoverUrl = (path) => path ? `${import.meta.env.VITE_API_URL}/uploads/covers/${path}` : null;
 
@@ -307,4 +322,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Profile; 

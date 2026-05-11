@@ -7,17 +7,22 @@ export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchPosts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(API_BASE_URL, { credentials: "include" });
-      if (res.ok) setPosts(data.data || []);
-    } catch (err) {
-      console.error("Fetch error:", err);
-    } finally {
-      setLoading(false);
+ const fetchPosts = useCallback(async () => {
+  setLoading(true);
+  try {
+    const res = await fetch(API_BASE_URL, { credentials: "include" });
+    const responseData = await res.json(); // აი ეს აკლდა!
+
+    if (res.ok) {
+      // ნახე შენი ბექენდი რას აბრუნებს: data.data-ს თუ პირდაპირ მასივს
+      setPosts(responseData.posts || responseData.data || responseData);
     }
-  }, []);
+  } catch (err) {
+    console.error("Fetch error:", err);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   //პოსტის დალაიკება
   const toggleLike = async (postId) => {
