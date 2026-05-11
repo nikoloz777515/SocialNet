@@ -12,14 +12,20 @@ export const AuthProvider = ({ children }) => {
 
 const loadUser = async () => {
   try {
+    // თუ localStorage-ში იუზერი არ არის, loadUser საერთოდ არ გაუშვა
+    const savedUser = localStorage.getItem("user");
+    if (!savedUser) {
+      setLoading(false);
+      return;
+    }
+
     const res = await fetch(`${API_URL}/me`, { credentials: "include" });
     const data = await res.json();
 
-    // შეცვლილი ლოგიკა პასუხის სტრუქტურის მიხედვით
     if (res.ok && data.user) {
       setUser(data.user);
-      localStorage.setItem("user", JSON.stringify(data.user));
     } else {
+      // თუ სერვერმა 401 დააბრუნა, ლოკალურადაც ვშლით
       setUser(null);
       localStorage.removeItem("user");
     }
@@ -31,6 +37,7 @@ const loadUser = async () => {
 };
 
 const signup = async (formData) => {
+  try {
     const res = await fetch(`${API_URL}/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -40,15 +47,21 @@ const signup = async (formData) => {
     
     const data = await res.json();
     
-    if (!res.ok) throw new Error(data.message || "Signup failed");
+    if (!res.ok) {
+      throw new Error(data.message || "Signup failed");
+    }
     
-    const userData = data?.data?.user || data?.user;
+    const userData = data.user || data.data?.user;
     if (userData) {
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
     }
     return data;
-  };
+  } catch (err) {
+    console.error("Signup error:", err);
+    throw err; 
+  }
+};
 
 const login = async (formData) => {
   const res = await fetch(`${API_URL}/login`, {
