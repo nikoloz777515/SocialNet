@@ -6,24 +6,24 @@ import { getAvatarUrl } from "../utils/avatar";
 export default function Friends() {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [friendships, setFriendships] = useState([]); 
+    const [friendships, setFriendships] = useState([]);
     const { setActiveChat } = useChat();
     const navigate = useNavigate();
 
-    const API_URL = "http://localhost:3000/api";
+    const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
     const fetchFriendships = async () => {
         try {
             const res = await fetch(`${API_URL}/friend/my-friends`, { credentials: 'include' });
             const data = await res.json();
-            
- 
+
+
             if (data.status === 'success') {
-                setFriendships(data.friends || []); 
+                setFriendships(data.friends || []);
             }
-        } catch (err) { 
-            console.error(err); 
-            setFriendships([]); 
+        } catch (err) {
+            console.error(err);
+            setFriendships([]);
         }
     };
 
@@ -35,7 +35,7 @@ export default function Friends() {
         try {
             const res = await fetch(`${API_URL}/auth/search?query=${searchTerm}`, { credentials: 'include' });
             const data = await res.json();
-           
+
             if (data.status === 'success') setSearchResults(data.data || []);
         } catch (err) { console.error(err); }
     };
@@ -61,7 +61,7 @@ export default function Friends() {
             <div className="bg-[#1e293b]/50 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-xl">
                 <h2 className="text-xl font-bold text-white mb-4">Find New Friends</h2>
                 <form onSubmit={handleSearch} className="flex gap-2">
-                    <input 
+                    <input
                         className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-all"
                         placeholder="Search by name..."
                         value={searchTerm}
@@ -74,10 +74,10 @@ export default function Friends() {
                     {searchResults.map(u => (
                         <div key={u._id} className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/5">
                             <Link to={`/profile/${u._id}`} className="flex items-center gap-3 group">
-                                <img 
-                                    src={getAvatarUrl(u.avatar || u.profilePicture)} 
-                                    className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-indigo-500 transition-all" 
-                                    alt="avatar" 
+                                <img
+                                    src={getAvatarUrl(u.avatar || u.profilePicture)}
+                                    className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-indigo-500 transition-all"
+                                    alt="avatar"
                                     onError={(e) => e.target.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
                                 />
                                 <span className="text-white font-medium group-hover:text-indigo-400 transition-colors">{u.fullname}</span>
@@ -89,22 +89,22 @@ export default function Friends() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
+
                 <div className="space-y-4">
                     <h2 className="text-lg font-bold text-indigo-400 uppercase tracking-widest">Your Network</h2>
                     {friendships.length === 0 && <p className="text-gray-500 text-sm italic">No friends found</p>}
                     {friendships.map(f => (
                         <div key={f._id} className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between group">
                             <Link to={`/profile/${f._id}`} className="flex items-center gap-3">
-                                <img 
-                                    src={getAvatarUrl(f.avatar)} 
-                                    className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:scale-110 group-hover:border-purple-500 transition-all" 
-                                    alt="friend" 
+                                <img
+                                    src={getAvatarUrl(f.avatar)}
+                                    className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:scale-110 group-hover:border-purple-500 transition-all"
+                                    alt="friend"
                                 />
                                 <span className="text-white font-medium group-hover:text-purple-400 transition-colors">{f.fullname}</span>
                             </Link>
                             <div className="flex gap-2">
-                                <button 
+                                <button
                                     onClick={() => { setActiveChat(f); navigate('/messages'); }}
                                     className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-xl transition-all"
                                 >

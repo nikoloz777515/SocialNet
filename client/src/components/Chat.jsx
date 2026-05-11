@@ -43,12 +43,12 @@ const Chat = () => {
     if (!file) return;
 
     const formData = new FormData();
-    formData.append("content", ""); 
-    formData.append("messageImage", file); 
+    formData.append("content", "");
+    formData.append("messageImage", file);
 
     try {
       await sendMessage(formData);
-      e.target.value = null; 
+      e.target.value = null;
     } catch (err) {
       console.error("File upload error:", err);
     }
@@ -68,15 +68,15 @@ const Chat = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-[#0f172a] h-full overflow-hidden relative border-l border-white/5">
-      
+
       {/* HEADER */}
       <div className="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center shrink-0 z-10 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <img 
-              src={getAvatarUrl(activeChat.avatar)} 
-              className="w-10 h-10 rounded-xl object-cover border border-indigo-500/20 shadow-lg shadow-indigo-500/10" 
-              alt="avatar" 
+            <img
+              src={getAvatarUrl(activeChat.avatar)}
+              className="w-10 h-10 rounded-xl object-cover border border-indigo-500/20 shadow-lg shadow-indigo-500/10"
+              alt="avatar"
             />
             {isGroup && (
               <div className="absolute -bottom-1 -right-1 bg-indigo-600 rounded-lg p-0.5 border border-[#0f172a]">
@@ -89,10 +89,10 @@ const Chat = () => {
               {chatName}
             </h3>
             <div className="flex items-center gap-1.5 mt-1.5">
-               <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isGroup ? 'bg-indigo-400' : 'bg-green-500'}`}></span>
-               <span className={`text-[9px] font-black tracking-widest uppercase ${isGroup ? 'text-indigo-400' : 'text-green-500'}`}>
-                  {isGroup ? `${activeChat.members?.length || 0} Members` : "Online"}
-               </span>
+              <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isGroup ? 'bg-indigo-400' : 'bg-green-500'}`}></span>
+              <span className={`text-[9px] font-black tracking-widest uppercase ${isGroup ? 'text-indigo-400' : 'text-green-500'}`}>
+                {isGroup ? `${activeChat.members?.length || 0} Members` : "Online"}
+              </span>
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed opacity-95">
         {messages.map((msg, idx) => {
           const isMe = msg.sender?._id === currentUser?._id || msg.sender === currentUser?._id;
-          
+
           return (
             <div key={msg._id || idx} className={`flex flex-col group ${isMe ? "items-end" : "items-start"}`}>
               {!isMe && isGroup && (
@@ -126,10 +126,10 @@ const Chat = () => {
                 <div className={`relative px-4 py-2.5 rounded-2xl shadow-lg ${isMe ? "bg-indigo-600 text-white rounded-tr-none" : "bg-white/10 text-gray-200 rounded-tl-none border border-white/5"}`}>
                   {msg.messageImage && (
                     <div className="my-1 overflow-hidden rounded-xl border border-white/10">
-                      <img 
-                        src={`http://localhost:3000/uploads/messages/${msg.messageImage}`} 
-                        className="max-w-full h-auto max-h-[350px] object-contain block" 
-                        alt="attachment" 
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}/uploads/messages/${msg.messageImage}`}
+                        className="max-w-full h-auto max-h-[350px] object-contain block"
+                        alt="attachment"
                       />
                     </div>
                   )}
@@ -150,18 +150,18 @@ const Chat = () => {
         {editingMessage && (
           <div className="flex justify-between items-center bg-indigo-500/10 p-2.5 mb-3 rounded-xl border-l-4 border-indigo-500 animate-in slide-in-from-left duration-300">
             <p className="text-[10px] text-indigo-400 uppercase font-black italic">რედაქტირება...</p>
-            <button onClick={() => {setEditingMessage(null); setContent("");}}><X size={16} className="text-white"/></button>
+            <button onClick={() => { setEditingMessage(null); setContent(""); }}><X size={16} className="text-white" /></button>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="flex gap-3 items-center">
           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
           {!editingMessage && (
             <button type="button" onClick={() => fileInputRef.current.click()} className="p-3 text-indigo-400 hover:bg-indigo-500/10 rounded-2xl transition-all"><Paperclip size={22} /></button>
           )}
-          <input 
-            type="text" 
-            value={content} 
+          <input
+            type="text"
+            value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={editingMessage ? "შეცვალე შეტყობინება..." : "დაწერე შეტყობინება..."}
             className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 text-white outline-none focus:ring-1 focus:ring-indigo-500/20 text-sm"

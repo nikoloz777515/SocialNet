@@ -25,7 +25,7 @@ const Profile = () => {
   const [newName, setNewName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [coverUploading, setCoverUploading] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false); // მეგობრობის მოქმედებებისთვის
+  const [actionLoading, setActionLoading] = useState(false); 
 
   const isMyProfile = !userId || userId === currentUser?._id;
 
@@ -36,7 +36,7 @@ const Profile = () => {
         const targetId = userId || currentUser?._id;
         if (!targetId) return;
 
-        const userRes = await fetch(`http://localhost:3000/api/friend/user/${targetId}`, { credentials: 'include' });
+        const userRes = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/user/${targetId}`, { credentials: 'include' });
         const userData = await userRes.json();
 
         if (userRes.ok) {
@@ -47,7 +47,7 @@ const Profile = () => {
           setNewName(userObj.fullname || "");
         }
 
-        const friendsRes = await fetch(`http://localhost:3000/api/friend/friends/${targetId}`, { credentials: 'include' });
+        const friendsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/friends/${targetId}`, { credentials: 'include' });
         const friendsData = await friendsRes.json();
 
         if (friendsRes.ok) {
@@ -67,7 +67,7 @@ const Profile = () => {
   const handleUpdateProfile = async () => {
     if (!newName.trim()) return;
     try {
-      const res = await fetch("http://localhost:3000/api/auth/updateMe", {
+      const res = await fetch("${import.meta.env.VITE_API_URL}/api/auth/updateMe", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullname: newName }),
@@ -90,7 +90,7 @@ const Profile = () => {
 
     type === 'profile' ? setUploading(true) : setCoverUploading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/auth/updateMe", {
+      const res = await fetch("${import.meta.env.VITE_API_URL}/api/auth/updateMe", {
         method: "PATCH",
         body: formData,
         credentials: "include",
@@ -107,16 +107,16 @@ const Profile = () => {
   // მეგობრობის მოთხოვნა / წაშლა
   const handleFriendAction = async () => {
     if (!profileUser?._id || actionLoading) return;
-    
+
     // ლოგიკა: თუ უკვე მეგობარია ან მოთხოვნა გაგზავნილია - წაშლა, თუ არადა - დამატება
     const isActionRemove = friendStatus === 'friends' || friendStatus === 'pending' || friendStatus === 'requested';
     const endpoint = isActionRemove ? 'remove-friend' : 'send-request';
-    
+
     if (friendStatus === 'friends' && !window.confirm("ნამდვილად გსურთ მეგობრობის გაუქმება?")) return;
 
     setActionLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/friend/${endpoint}/${profileUser._id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/${endpoint}/${profileUser._id}`, {
         method: 'POST',
         credentials: 'include'
       });
@@ -131,7 +131,7 @@ const Profile = () => {
     }
   };
 
-  const getCoverUrl = (path) => path ? `http://localhost:3000/uploads/covers/${path}` : null;
+  const getCoverUrl = (path) => path ? `${import.meta.env.VITE_API_URL}/uploads/covers/${path}` : null;
 
   if (loading) return <div className="min-h-screen bg-[#0f172a] flex items-center justify-center text-white italic">Loading Profile...</div>;
 
@@ -207,27 +207,25 @@ const Profile = () => {
                     <button
                       disabled={actionLoading}
                       onClick={handleFriendAction}
-                      className={`px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg cursor-pointer ${
-                        friendStatus === 'pending' || friendStatus === 'requested' ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/20' : 
-                        friendStatus === 'friends' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 
-                        'bg-indigo-600 text-white hover:bg-indigo-700'
-                      }`}
+                      className={`px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg cursor-pointer ${friendStatus === 'pending' || friendStatus === 'requested' ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/20' :
+                          friendStatus === 'friends' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                            'bg-indigo-600 text-white hover:bg-indigo-700'
+                        }`}
                     >
-                      {friendStatus === 'pending' || friendStatus === 'requested' ? <Clock size={18}/> : 
-                       friendStatus === 'friends' ? <UserMinus size={18}/> : <UserPlus size={18}/>}
-                      {friendStatus === 'pending' || friendStatus === 'requested' ? 'მოლოდინი' : 
-                       friendStatus === 'friends' ? 'წაშლა' : 'დამატება'}
+                      {friendStatus === 'pending' || friendStatus === 'requested' ? <Clock size={18} /> :
+                        friendStatus === 'friends' ? <UserMinus size={18} /> : <UserPlus size={18} />}
+                      {friendStatus === 'pending' || friendStatus === 'requested' ? 'მოლოდინი' :
+                        friendStatus === 'friends' ? 'წაშლა' : 'დამატება'}
                     </button>
 
                     {/* Message ღილაკი - გააქტიურდება მხოლოდ თუ მეგობრები არიან */}
                     <button
                       disabled={friendStatus !== 'friends'}
                       onClick={() => { setActiveChat(profileUser); navigate('/messages'); }}
-                      className={`px-8 py-3 rounded-2xl font-black uppercase flex items-center gap-3 transition-all cursor-pointer shadow-lg ${
-                        friendStatus === 'friends' 
-                        ? "bg-white/10 hover:bg-white/20 border border-white/10" 
-                        : "bg-white/5 text-gray-600 cursor-not-allowed border border-white/5"
-                      }`}
+                      className={`px-8 py-3 rounded-2xl font-black uppercase flex items-center gap-3 transition-all cursor-pointer shadow-lg ${friendStatus === 'friends'
+                          ? "bg-white/10 hover:bg-white/20 border border-white/10"
+                          : "bg-white/5 text-gray-600 cursor-not-allowed border border-white/5"
+                        }`}
                     >
                       <MessageSquare size={22} /> Message
                     </button>

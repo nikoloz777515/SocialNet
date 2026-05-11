@@ -3,7 +3,7 @@ import { useContext, createContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
-const API_URL = "http://localhost:3000/api/auth";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/auth`;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -14,8 +14,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await fetch(`${API_URL}/me`, { credentials: "include" });
       const data = await res.json();
+
       
-      // აქ არის ცვლილება: ვამოწმებთ data.user-საც
       const userData = data?.data?.user || data?.user;
 
       if (res.ok && userData) {
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }; 
+  };
 
   const signup = async (formData) => {
     const res = await fetch(`${API_URL}/signup`, {

@@ -95,7 +95,7 @@ const GroupChat = () => {
                                     </p>
                                 )}
                                 <div className="flex items-center gap-2 group max-w-[85%]">
-                                   
+
                                     <div className={`invisible group-hover:visible flex gap-1 bg-[#1e293b] p-1 rounded-lg border border-white/10 ${isMe ? 'order-first' : 'order-last'}`}>
                                         <button onClick={() => navigator.clipboard.writeText(msg.content)} className="p-1 text-gray-400 hover:text-white"><Copy size={12} /></button>
                                         {isMe && (
@@ -110,7 +110,7 @@ const GroupChat = () => {
                                         {msg.content && <p className="text-sm break-words">{msg.content}</p>}
                                         {msg.messageImage && (
                                             <img
-                                                src={`http://localhost:3000/uploads/messages/${msg.messageImage}`}
+                                                src={`${import.meta.env.VITE_API_URL}/uploads/messages/${msg.messageImage}`}
                                                 className="rounded-lg mt-2 max-w-full border border-white/5 shadow-md"
                                                 alt="attached"
                                             />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ShieldAlert, Trash2, UserCheck, UserX } from 'lucide-react';
-import { Link } from 'react-router-dom'; 
-import { getAvatarUrl } from '../utils/avatar'; 
+import { Link } from 'react-router-dom';
+import { getAvatarUrl } from '../utils/avatar';
 
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
@@ -9,7 +9,7 @@ const AdminPanel = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/admin/all-users', { 
+      const res = await fetch('${import.meta.env.VITE_API_URL}/api/admin/all-users', {
         credentials: 'include',
       });
       const data = await res.json();
@@ -30,7 +30,7 @@ const AdminPanel = () => {
   const handleBanToggle = async (userId, isBanned) => {
     const endpoint = isBanned ? 'unban-user' : 'ban-user';
     try {
-      const res = await fetch(`http://localhost:3000/api/admin/${endpoint}/${userId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/${endpoint}/${userId}`, {
         method: 'PATCH',
         credentials: 'include',
       });
@@ -45,7 +45,7 @@ const AdminPanel = () => {
   const handleDelete = async (userId) => {
     if (!window.confirm('დარწმუნებული ხართ, რომ გსურთ იუზერის წაშლა?')) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/admin/delete-user/${userId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/delete-user/${userId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -84,8 +84,8 @@ const AdminPanel = () => {
                     {/* Link ამატებს გადასვლას პროფილზე */}
                     <Link to={`/profile/${user._id}`} className="flex items-center gap-4 group">
                       <div className="relative shrink-0">
-                        <img 
-                          src={getAvatarUrl(user.avatar || user.profilePicture)} 
+                        <img
+                          src={getAvatarUrl(user.avatar || user.profilePicture)}
                           alt={user.fullname}
                           className="w-12 h-12 rounded-2xl object-cover border-2 border-white/10 group-hover:border-indigo-500 transition-all"
                           onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; }}

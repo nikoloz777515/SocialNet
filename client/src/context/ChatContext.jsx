@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
 const ChatContext = createContext();
-const API_URL = "http://localhost:3000/api";
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -19,7 +19,7 @@ export const ChatProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState({});
 
-  
+
     const [friends, setFriends] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
 
@@ -52,7 +52,7 @@ export const ChatProvider = ({ children }) => {
 
     useEffect(() => {
         if (user?._id) {
-            const newSocket = io("http://localhost:3000", { withCredentials: true });
+            const newSocket = io("${import.meta.env.VITE_API_URL}", { withCredentials: true });
             setSocket(newSocket);
             newSocket.emit('setup', user._id);
             newSocket.on('userStatusUpdate', (users) => setOnlineUsers(users));

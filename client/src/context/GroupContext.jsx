@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const GroupContext = createContext();
-const API_BASE_URL = "http://localhost:3000/api/groups";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/groups`;
 
 export const GroupProvider = ({ children }) => {
   const [groups, setGroups] = useState([]);
@@ -29,7 +29,7 @@ export const GroupProvider = ({ children }) => {
       credentials: "include",
       body: isFormData ? groupData : JSON.stringify(groupData)
     });
-    
+
     const responseData = await res.json();
     if (!res.ok) throw new Error(responseData.message || "Error creating group");
     setGroups(prev => [...prev, responseData.data]);
@@ -38,9 +38,9 @@ export const GroupProvider = ({ children }) => {
 
   const joinGroup = async (groupId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/${groupId}/join`, { 
-        method: 'POST', 
-        credentials: "include" 
+      const res = await fetch(`${API_BASE_URL}/${groupId}/join`, {
+        method: 'POST',
+        credentials: "include"
       });
       if (res.ok) await fetchGroups();
     } catch (err) { console.error(err.message); }
