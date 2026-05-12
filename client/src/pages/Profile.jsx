@@ -40,12 +40,10 @@ const Profile = () => {
 
   const isMyProfile = !userId || userId === currentUser?._id;
 
-  // ფუნქცია მონაცემების წამოსაღებად (გამოტანილია გარეთ, რომ მეგობრობისას გამოვიყენოთ)
   const fetchProfileData = async () => {
     try {
       const targetId = userId || currentUser?._id;
       if (!targetId) return;
-
       const userRes = await fetch(`${import.meta.env.VITE_API_URL}/api/friend/user/${targetId}`, { credentials: 'include' });
       const userData = await userRes.json();
 
@@ -116,22 +114,17 @@ const Profile = () => {
     } catch (err) { console.error(err); }
     finally { type === 'profile' ? setUploading(false) : setCoverUploading(false); }
   };
-
-  const handleFriendAction = async () => {
+const handleFriendAction = async () => {
     if (!profileUser?._id || actionLoading) return;
 
-    // 1. სწორად განვსაზღვროთ ენდპოინტი ბექენდის მიხედვით:
-    let endpoint = '';
     
+    let endpoint = 'send-request';
     if (friendStatus === 'friends') {
-        endpoint = 'remove-friend'; // მეგობრის წაშლა (unFriend ფუნქცია ბექენდზე)
+        endpoint = 'remove-friend';
     } else if (friendStatus === 'pending' || friendStatus === 'requested') {
-        endpoint = 'reject-request'; // გაგზავნილი რექვესთის გაუქმება (rejectOrCancelRequest ფუნქცია)
-    } else {
-        endpoint = 'send-request'; // ახალი რექვესთის გაგზავნა
+        endpoint = 'reject-request';
     }
 
-    // დადასტურება მხოლოდ წაშლის დროს
     if (friendStatus === 'friends' && !window.confirm("ნამდვილად გსურთ მეგობრობის გაუქმება?")) return;
 
     setActionLoading(true);
@@ -144,7 +137,6 @@ const Profile = () => {
         const responseData = await res.json();
 
         if (res.ok) {
-            // მოქმედება წარმატებით დასრულდა, თავიდან ვტვირთავთ პროფილის დატას
             await fetchProfileData();
         } else {
             alert(responseData.message || "შეცდომა მოქმედებისას");
@@ -155,8 +147,12 @@ const Profile = () => {
         setActionLoading(false);
     }
 };
-
-  const getCoverUrl = (path) => path ? `${import.meta.env.VITE_API_URL}/uploads/covers/${path}` : null;
+const getCoverUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('http')) return path; 
+  
+  return `${import.meta.env.VITE_API_URL}/uploads/covers/${path}`;
+};
 
   if (loading) return <div className="min-h-screen bg-[#0f172a] flex items-center justify-center text-white italic">Loading Profile...</div>;
 
@@ -262,14 +258,12 @@ const Profile = () => {
         <div className="flex flex-col lg:flex-row gap-10">
 
           <div className="flex-1 space-y-6">
-  <h2 className="text-2xl font-black italic uppercase text-indigo-400 tracking-widest">
-    Timeline
-  </h2>
-
- 
+  <h2 className="text-2xl font-black italic uppercase text-indigo-400 tracking-widest">Timeline</h2>
   {(() => {
     const userPosts = posts.filter(p => {
       const postAuthorId = p.userId?._id || p.userId;
+      
+      // კრიტიკული ცვლილება: შედარება ხდება .toString()-ით
       return postAuthorId?.toString() === profileUser?._id?.toString();
     });
 
@@ -284,6 +278,8 @@ const Profile = () => {
     );
   })()}
 </div>
+
+
           <div className="w-full lg:w-[380px]">
             <div className="bg-white/5 border border-white/10 rounded-[40px] p-8 sticky top-5 shadow-xl">
               <div className="flex items-center justify-between mb-8">
