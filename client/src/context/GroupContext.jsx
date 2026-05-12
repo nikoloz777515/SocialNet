@@ -5,6 +5,7 @@ const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/groups`;
 
 export const GroupProvider = ({ children }) => {
   const [groups, setGroups] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeGroup, setActiveGroup] = useState(null);
 
@@ -35,6 +36,19 @@ export const GroupProvider = ({ children }) => {
     setGroups(prev => [...prev, responseData.data]);
     return responseData.data;
   };
+const searchGroups = async (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE_URL}/search?query=${query}`, { credentials: "include" });
+      const responseData = await res.json();
+      if (res.ok) setSearchResults(responseData.data || []);
+    } catch (err) {
+      console.error("Search error", err);
+    }
+  };
 
   const joinGroup = async (groupId) => {
     try {
@@ -62,7 +76,7 @@ export const GroupProvider = ({ children }) => {
   useEffect(() => { fetchGroups(); }, [fetchGroups]);
 
   return (
-    <GroupContext.Provider value={{ groups, loading, activeGroup, fetchGroups, createGroup, joinGroup, deleteGroup, selectGroup: setActiveGroup }}>
+    <GroupContext.Provider value={{ groups,searchGroups, loading, activeGroup, fetchGroups, createGroup, joinGroup, deleteGroup, selectGroup: setActiveGroup,searchResults}}>
       {children}
     </GroupContext.Provider>
   );

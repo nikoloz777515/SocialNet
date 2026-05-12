@@ -46,7 +46,9 @@ const joinGroup = catchAsync(async (req, res, next) => {
 
     if (!group) return next(new AppError("Group not found", 404));
 
-    if (group.members.includes(req.user._id)) {
+    // სწორი შემოწმება ObjectId-ისთვის
+    const isMember = group.members.some(memberId => memberId.equals(req.user._id));
+    if (isMember) {
         return next(new AppError("You are already a member", 400));
     }
 
