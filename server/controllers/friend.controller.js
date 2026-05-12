@@ -36,14 +36,14 @@ const sendFriendRequest = catchAsync(async (req, res, next) => {
 });
 
 const acceptFriendRequest = catchAsync(async (req, res, next) => {
-    const friendId = req.params.userId; // ფრონტენდიდან მოდის იუზერის ID
+    const friendId = req.params.userId; 
     const friendship = await Friendship.findOneAndUpdate(
-        { sender: friendId, receiver: req.user.id, status: 'pending' },
+        { sender: friendId, receiver: req.user._id, status: 'pending' }, 
         { status: 'accepted' },
         { new: true }
     );
 
-    if (!friendship) return next(new AppError("Request not found", 404));
+    if (!friendship) return next(new AppError("მოთხოვნა ვერ მოიძებნა", 404));
     res.status(200).json({ status: 'success', message: 'Friendship accepted' });
 });
 
@@ -120,4 +120,18 @@ const getUserById = async (req, res) => {
     }
 };
 
-module.exports = {sendFriendRequest,acceptFriendRequest,rejectOrCancelRequest,unFriend,getMyFriends,searchUsers,getUserById};
+const getFriendRequests = catchAsync(async (req, res, next) => {
+  
+    const requests = await Friendship.find({
+        receiver: req.user._id,
+        status: 'pending'
+    }).populate('sender', 'fullname avatar profilePicture email');
+
+    res.status(200).json({
+        status: 'success',
+        results: requests.length,
+        requests
+    });
+});
+
+module.exports = {sendFriendRequest,acceptFriendRequest,rejectOrCancelRequest,unFriend,getMyFriends,searchUsers,getUserById,getFriendRequests};

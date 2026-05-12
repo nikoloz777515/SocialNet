@@ -2,7 +2,7 @@ const express = require('express');
 const protect = require('../middlewares/protect.middleware');
 const friendRouter = express.Router()
 
-const {sendFriendRequest,acceptFriendRequest,rejectOrCancelRequest,unFriend,getMyFriends,searchUsers,getUserById} = require('../controllers/friend.controller')
+const {sendFriendRequest,acceptFriendRequest,rejectOrCancelRequest,unFriend,getMyFriends,searchUsers,getUserById,getFriendRequests} = require('../controllers/friend.controller')
 friendRouter.use(protect);
 
 //საკუტარი მეგობრების სია
@@ -22,4 +22,6 @@ friendRouter.get('/search', protect, searchUsers);
 friendRouter.get('/user/:id',getUserById)
 
 friendRouter.get('/friends/:userId', getMyFriends);
+
+friendRouter.get('/requests', getFriendRequests);
 module.exports = friendRouter;

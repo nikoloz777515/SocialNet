@@ -7,17 +7,17 @@ export default function Friends() {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [friendships, setFriendships] = useState([]);
+    const [requests, setRequests] = useState([]); // დავამატეთ მოთხოვნების სთეითი
     const { setActiveChat } = useChat();
     const navigate = useNavigate();
 
     const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
+    // 1. მეგობრების სიის წამოღება
     const fetchFriendships = async () => {
         try {
             const res = await fetch(`${API_URL}/friend/my-friends`, { credentials: 'include' });
             const data = await res.json();
-
-
             if (data.status === 'success') {
                 setFriendships(data.friends || []);
             }
@@ -27,19 +27,38 @@ export default function Friends() {
         }
     };
 
-    useEffect(() => { fetchFriendships(); }, []);
+    // 2. მომავალი მოთხოვნების წამოღება
+    const fetchRequests = async () => {
+        try {
+            const res = await fetch(`${API_URL}/friend/requests`, { credentials: 'include' });
+            const data = await res.json();
+            if (data.status === 'success') {
+                setRequests(data.requests || []);
+            }
+        } catch (err) {
+            console.error("მოთხოვნების წამოღება ვერ მოხერხდა", err);
+        }
+    };
+
+    // ჩატვირთვისას ორივე ფუნქციის გამოძახება
+    useEffect(() => { 
+        fetchFriendships(); 
+        fetchRequests();
+    }, []);
 
     const handleSearch = async (e) => {
         e.preventDefault();
         if (!searchTerm.trim()) return;
         try {
-            const res = await fetch(`${API_URL}/auth/search?query=${searchTerm}`, { credentials: 'include' });
+            const res = await fetch(`${API_URL}/friend/search?query=${searchTerm}`, { credentials: 'include' });
             const data = await res.json();
-
-            if (data.status === 'success') setSearchResults(data.data || []);
+            if (res.ok) {
+                setSearchResults(data.users || data.data || []);
+            }
         } catch (err) { console.error(err); }
     };
 
+    // ზოგადი მოქმედება (Add Friend / Remove Friend)
     const manageAction = async (userId, action) => {
         try {
             const res = await fetch(`${API_URL}/friend/${action}/${userId}`, {
@@ -47,8 +66,9 @@ export default function Friends() {
                 credentials: 'include'
             });
             const data = await res.json();
-            if (data.status === 'success') {
+            if (res.ok) {
                 fetchFriendships();
+                fetchRequests();
                 setSearchResults([]);
                 setSearchTerm('');
             }
@@ -89,7 +109,39 @@ export default function Friends() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* 1. მოთხოვნების სექცია (Pending Requests) */}
+                <div className="space-y-4">
+                    <h2 className="text-lg font-bold text-yellow-500 uppercase tracking-widest">Friend Requests</h2>
+                    {requests.length === 0 && <p className="text-gray-500 text-sm italic">No pending requests</p>}
+                    {requests.map(req => (
+                        <div key={req._id} className="p-4 bg-white/5 rounded-2xl border border-yellow-500/20 flex items-center justify-between group">
+                            <div className="flex items-center gap-3">
+                                <img
+                                    src={getAvatarUrl(req.sender.avatar || req.sender.profilePicture)}
+                                    className="w-10 h-10 rounded-full object-cover border border-white/10"
+                                    alt="sender"
+                                />
+                                <span className="text-white font-medium">{req.sender.fullname}</span>
+                            </div>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => manageAction(req.sender._id, 'accept-request')} 
+                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                                >
+                                    Accept
+                                </button>
+                                <button 
+                                    onClick={() => manageAction(req.sender._id, 'reject-request')} 
+                                    className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all border border-red-600/30"
+                                >
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
 
+                {/* 2. მეგობრების სექცია (Your Network) */}
                 <div className="space-y-4">
                     <h2 className="text-lg font-bold text-indigo-400 uppercase tracking-widest">Your Network</h2>
                     {friendships.length === 0 && <p className="text-gray-500 text-sm italic">No friends found</p>}

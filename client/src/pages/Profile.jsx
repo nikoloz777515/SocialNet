@@ -120,14 +120,18 @@ const Profile = () => {
   const handleFriendAction = async () => {
     if (!profileUser?._id || actionLoading) return;
 
-    // სტატუსების მიხედვით ენდპოინტის განსაზღვრა
-    const isActionRemove = friendStatus === 'friends';
-    const isActionCancel = friendStatus === 'pending' || friendStatus === 'requested';
+    // 1. სწორად განვსაზღვროთ ენდპოინტი ბექენდის მიხედვით:
+    let endpoint = '';
     
-    let endpoint = 'send-request';
-    if (isActionRemove) endpoint = 'remove-friend';
-    if (isActionCancel) endpoint = 'reject-request'; // შენს როუტებში reject-request გამოიყენება გასაუქმებლად
+    if (friendStatus === 'friends') {
+        endpoint = 'remove-friend'; // მეგობრის წაშლა (unFriend ფუნქცია ბექენდზე)
+    } else if (friendStatus === 'pending' || friendStatus === 'requested') {
+        endpoint = 'reject-request'; // გაგზავნილი რექვესთის გაუქმება (rejectOrCancelRequest ფუნქცია)
+    } else {
+        endpoint = 'send-request'; // ახალი რექვესთის გაგზავნა
+    }
 
+    // დადასტურება მხოლოდ წაშლის დროს
     if (friendStatus === 'friends' && !window.confirm("ნამდვილად გსურთ მეგობრობის გაუქმება?")) return;
 
     setActionLoading(true);
@@ -137,18 +141,13 @@ const Profile = () => {
             credentials: 'include'
         });
 
-        // აი აქ იყო შეცდომა - ჯერ ვიღებთ დატას
         const responseData = await res.json();
 
         if (res.ok) {
-            fetchProfileData();
+            // მოქმედება წარმატებით დასრულდა, თავიდან ვტვირთავთ პროფილის დატას
+            await fetchProfileData();
         } else {
-            // თუ უკვე არსებობს, მაინც განვაახლოთ ვიზუალი
-            if (responseData.message && responseData.message.includes("exists")) {
-                fetchProfileData();
-            } else {
-                console.error("Server Error:", responseData.message);
-            }
+            alert(responseData.message || "შეცდომა მოქმედებისას");
         }
     } catch (err) {
         console.error("Fetch Error:", err);
@@ -263,18 +262,28 @@ const Profile = () => {
         <div className="flex flex-col lg:flex-row gap-10">
 
           <div className="flex-1 space-y-6">
-            <h2 className="text-2xl font-black italic uppercase text-indigo-400 tracking-widest">Timeline</h2>
-            {posts.filter(p => (p.userId?._id || p.userId) === profileUser?._id).length > 0 ? (
-              posts.filter(p => (p.userId?._id || p.userId) === profileUser?._id).map(post => (
-                <PostCard key={post._id} post={post} />
-              ))
-            ) : (
-              <div className="text-gray-500 italic p-16 bg-white/5 rounded-[40px] border border-white/5 text-center uppercase font-bold tracking-widest">
-                პოსტები არ არის
-              </div>
-            )}
-          </div>
+  <h2 className="text-2xl font-black italic uppercase text-indigo-400 tracking-widest">
+    Timeline
+  </h2>
 
+ 
+  {(() => {
+    const userPosts = posts.filter(p => {
+      const postAuthorId = p.userId?._id || p.userId;
+      return postAuthorId?.toString() === profileUser?._id?.toString();
+    });
+
+    return userPosts.length > 0 ? (
+      userPosts.map(post => (
+        <PostCard key={post._id} post={post} />
+      ))
+    ) : (
+      <div className="text-gray-500 italic p-16 bg-white/5 rounded-[40px] border border-white/5 text-center uppercase font-bold tracking-widest">
+        პოსტები არ არის
+      </div>
+    );
+  })()}
+</div>
           <div className="w-full lg:w-[380px]">
             <div className="bg-white/5 border border-white/10 rounded-[40px] p-8 sticky top-5 shadow-xl">
               <div className="flex items-center justify-between mb-8">
