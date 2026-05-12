@@ -1,4 +1,4 @@
-const Friendship = require('../models/friendship.model'); // დარწმუნდი რომ აქ 'd' წერია
+const Friendship = require('../models/frienship.model');
 const User = require('../models/user.model');
 const catchAsync = require('../utils/CatchAsync');
 const AppError = require('../utils/AppError');
